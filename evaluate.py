@@ -8,17 +8,21 @@ import pandas as pd
 
 from src.app_logger import logger
 from src.eval import calc_metrics
+from config import *
 
 @click.command()
 @click.option('--ground_truth', '-t', default='data.csv',
               type=click.Path(exists=True, path_type=Path), help = 'CSV file with ground truth.')
 @click.option('--predictions', '-p', default='predict.csv',
               type=click.Path(exists=True, path_type=Path), help = 'CSV file with predictions.')
-def evaluation(ground_truth: Path, predictions: Path) -> None:
+@click.option('--save_errors', '-e', is_flag = True, default = False,
+              help = f'Save errors to {ERRORS_FILE} file.')
+def evaluation(ground_truth: Path, predictions: Path, save_errors: bool) -> None:
     """
     Log classification metrics:
         - accuracy
-        - confusion matrix.
+        - confusion matrix
+    Save errors list.
     CSV files format:
         'path': path to image
         'class_number': class number
@@ -28,9 +32,12 @@ def evaluation(ground_truth: Path, predictions: Path) -> None:
         assert list(ground_truth_df.columns) == ['path', 'class_number'], "Ground truth file with incorrect columns. Correct columns names: ['path', 'class_number']"
         predictions_df = pd.read_csv(predictions)
         assert list(predictions_df.columns) == ['path', 'class_number'], "Predictions file with incorrect columns. Correct columns names: ['path', 'class_number']"
-        accuracy, conf_matrix = calc_metrics(ground_truth_df, predictions_df)
+        accuracy, conf_matrix, errors_df = calc_metrics(ground_truth_df, predictions_df)
         logger.info(f"Accuracy: {accuracy}")
         logger.info(f"Confusion matrix: \n{conf_matrix}")
+        if save_errors:
+            errors_df.to_csv(ERRORS_FILE, index=False)
+            logger.info(f"Save errors to {ERRORS_FILE}.")
     except AssertionError as message:
         logger.info(f"evaluation: some errors: {message}.")
     except:

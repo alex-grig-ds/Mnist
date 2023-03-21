@@ -1,5 +1,6 @@
 
 LOG_FOLDER = "./log"
+ERRORS_FILE = './errors.csv'
 
 # DATA
 MAX_COUNT_OF_ERROR_IMAGES = 15
