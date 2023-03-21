@@ -4,33 +4,12 @@ from pathlib import Path
 import pandas as pd
 from tqdm import tqdm
 import torch
-from torch.optim import Adam
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
-from torch.nn import CrossEntropyLoss
 
 from src.app_logger import logger
-from src.class_dataset import TrainDataset
+from src.class_dataset import InferenceDataset
 from src.class_model import CustomModel
 from config import *
-
-
-def train(dataset: Path, model_path:Path) -> None:
-    """
-    Train model with specified data. Save model to specified path.
-    :param dataset: dataset csv-file:
-        path_to_the_image, class_number
-    :param model_path: path for model saving
-    :return:
-    """
-    logger.info("Start data reading.")
-    dataset_df = pd.read_csv(dataset)
-    train_df = dataset_df.sample(frac=TRAIN_TEST_SPLIT)
-    test_df = dataset_df.drop(train_df.index)
-    train_data = TrainDataset(train_df)
-    test_data = TrainDataset(test_df)
-    train_loader = DataLoader(dataset=train_data, batch_size=BATCH_SIZE)
-    test_loader = DataLoader(dataset=test_data, batch_size=BATCH_SIZE)
 
 
 def inference(input_data: Path, model_path: Path, predict_file: Path) -> None:
@@ -42,10 +21,25 @@ def inference(input_data: Path, model_path: Path, predict_file: Path) -> None:
     :return:
     """
     logger.info("Start data reading.")
-    dataset_df = pd.read_csv(dataset)
-    train_df = dataset_df.sample(frac=TRAIN_TEST_SPLIT)
-    test_df = dataset_df.drop(train_df.index)
-    train_data = TrainDataset(train_df)
-    test_data = TrainDataset(test_df)
-    train_loader = DataLoader(dataset=train_data, batch_size=BATCH_SIZE)
-    test_loader = DataLoader(dataset=test_data, batch_size=BATCH_SIZE)
+    dataset_df = pd.read_csv(input_data)
+    inference_data = InferenceDataset(dataset_df)
+    data_loader = DataLoader(dataset=inference_data, batch_size=INFERENCE_BATCH_SIZE)
+
+    logger.info("Start model loading.")
+    model = CustomModel(target_size=CLASSES_NUMBER)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model.to(device)
+    model.load_state_dict(torch.load(model_path))
+    model.eval()
+
+    logger.info("Start prediction.")
+    output_df = pd.DataFrame(columns = ['path', 'class_number'])
+    for batch in tqdm(data_loader):
+        images = batch[0].to(device)
+        predict = model(images)
+        predict = torch.argmax(predict, axis=1).to('cpu')
+        for idx, img_file in enumerate(batch[1]):
+            output_df.loc[len(output_df), :] = [img_file, predict[idx].item()]
+    output_df.to_csv(predict_file, index=False)
+    logger.info(f"Save predictions to {str(predict_file)}")
+

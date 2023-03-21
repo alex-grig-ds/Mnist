@@ -38,7 +38,7 @@ def mnist(mode: str, dataset: Path, model: Path, input_: Path, output: Path):
             assert model.is_file(), 'Model file is missing'
             output.parent.mkdir(exist_ok=True, parents=True)
             logger.info("MNIST: start inference.")
-            inference(input, model, output)
+            inference(input_, model, output)
     except AssertionError as message:
         logger.info(f"mnist: some errors: {message}.")
     except:

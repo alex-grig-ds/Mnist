@@ -33,7 +33,7 @@ def train(dataset: Path, model_path:Path) -> None:
     test_loader = DataLoader(dataset=test_data, batch_size=BATCH_SIZE)
 
     logger.info("Start model loading.")
-    model = CustomModel(target_size=len(train_data.class_list))
+    model = CustomModel(target_size=CLASSES_NUMBER)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
     model.train()
@@ -44,7 +44,6 @@ def train(dataset: Path, model_path:Path) -> None:
     optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
     scheduler = ReduceLROnPlateau(optimizer, factor=SCHEDULER_LR_MULT_FACTOR, patience=SCHEDULER_PLATO_SIZE)
     criterion = CrossEntropyLoss()
-
     best_tp = 0
     for epoch in range(EPOCHS):
         curr_lr = optimizer.param_groups[0]['lr']
@@ -81,5 +80,4 @@ def train(dataset: Path, model_path:Path) -> None:
         scheduler.step(valid_loss / len(test_loader))
 
     logger.info(f"Training is finished. Best accuracy: {best_tp / len(test_loader):.3f}. Best model saved to {model_path}.")
-
 

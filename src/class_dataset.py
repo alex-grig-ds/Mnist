@@ -32,7 +32,7 @@ class TrainDataset(Dataset):
             logger.info(f"TrainDataset: some errors: {message}.")
             exit(0)
         except:
-            logger.info(f"TrainDataset: some errors occured. Reason: {tb.format_exc()}")
+            logger.info(f"TrainDataset: some errors occurred. Reason: {tb.format_exc()}")
             exit(0)
 
     def __len__(self):
@@ -59,6 +59,7 @@ class TrainDataset(Dataset):
         return image, label
 
 
+@dataclass
 class InferenceDataset(Dataset):
     """
     Get image samples from specified list
@@ -67,14 +68,13 @@ class InferenceDataset(Dataset):
 
     def __post_init__(self):
         try:
-            assert list(self.img_files_df.columns) == ['path'], "Dataset file with incorrect columns. Correct columns names: ['path']"
-            self.class_list = self.img_files_df['class_number'].unique()
+            assert 'path' in list(self.img_files_df.columns), "Dataset file with incorrect columns. No column 'path'."
             self.transform = transforms.ToTensor()
         except AssertionError as message:
             logger.info(f"InferenceDataset: some errors: {message}.")
             exit(0)
         except:
-            logger.info(f"InferenceDataset: some errors occured. Reason: {tb.format_exc()}")
+            logger.info(f"InferenceDataset: some errors occurred. Reason: {tb.format_exc()}")
             exit(0)
 
     def __len__(self):
@@ -82,7 +82,7 @@ class InferenceDataset(Dataset):
 
     def __getitem__(self, idx):
         """
-        :return: sample: image
+        :return: sample: image, path_to_image
         """
         fail = True
         counter = 0
@@ -97,5 +97,5 @@ class InferenceDataset(Dataset):
                 counter += 1
                 if counter >= MAX_COUNT_OF_ERROR_IMAGES:
                     exit(0)
-        return image
+        return image, self.img_files_df.loc[idx, 'path']
 
