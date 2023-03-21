@@ -22,7 +22,7 @@ class TrainDataset(Dataset):
 
     def __post_init__(self):
         try:
-            assert list(self.img_files_df.columns) == ['path', 'class_number'], "Dataset file with incorrect columns. Correct columns name: ['path', 'class_number']"
+            assert list(self.img_files_df.columns) == ['path', 'class_number'], "Dataset file with incorrect columns. Correct columns names: ['path', 'class_number']"
             if self.get_random:
                 self.img_files_df = self.img_files_df.sample(frac=1, random_state=RANDOM_SEED)
                 self.img_files_df.reset_index(drop=True, inplace=True)

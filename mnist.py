@@ -20,12 +20,14 @@ from src.inference import inference
               type=click.Path(path_type=Path), help = 'CSV file with input data.')
 @click.option('--output', '-o',
               type=click.Path(path_type=Path), help = 'CSV file for saving predictions.')
-def mnist(mode: str, dataset: Path, model: Path, input_: Path, output: Path):
+def mnist(mode: str, dataset: Path, model: Path, input_: Path, output: Path) -> None:
     """
     Classification with MNIST dataset.
     If mode = 'train' - train with specified dataset.
     If mode = 'inference' - make inference for specified data
-    CSV files format: path_to_image, class_number
+    CSV files format:
+        'path': path to image
+        'class_number': class number
     """
     try:
         if mode == 'train':
