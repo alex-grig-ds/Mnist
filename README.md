@@ -2,26 +2,18 @@
 
 ![](./images/mnist.jpg)
 
-For MNIST model training:
+For MNIST model training:  
+     ./mnist.py --mode train --dataset /path/to/dataset.csv --model /path/for/saving/model_weights 
 
-For MNIST data classification:
+For MNIST data classification:  
+     ./mnist.py --mode inference --model /path/to/model_weights --input /path/to/input_data.csv --output /path/for/saving/predictions.csv
 
-
-To start detection:  
-poetry run python main_detect.py --input_folder 'input_image_file' --output_folder 'output_image_folder' --saved_objects 'saved_objects.csv'
-
-To see all parameters:
-poetry run python main_detect.py --help
+For predict evaluation:  
+     ./evaluate.py --ground_truth /path/to/ground_truth.csv --predictions /path/to/predictions.csv
 
 Config params are saved in config.py
 
 ### Before launching:
-1. Before starting the program, you need to install poetry if it is not installed:  
-curl -sSL https://install.python-poetry.org | python3 -
-2. Install dependencies:
-poetry install
-
-Or install dependencies with pip:  
 pip install -r requirements.txt
 
 
